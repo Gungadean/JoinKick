@@ -4,21 +4,34 @@ import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.Component;
 
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 @Plugin(id = PluginInfo.ID, name = PluginInfo.NAME, version = PluginInfo.VERSION, description = PluginInfo.DESCRIPTION)
 public class JoinKick {
-    @Inject
-    private ProxyServer proxy;
+    private final ProxyServer proxy;
+    private final Logger logger;
 
     private HashMap<String, RegisteredServer> pendingConnections = new HashMap<>();
+
+    @Inject
+    public JoinKick(ProxyServer proxy, Logger logger) {
+        this.proxy = proxy;
+        this.logger = logger;
+    }
+
+    @Subscribe
+    public void onProxyInitialize(ProxyInitializeEvent event) {
+        logger.info("JoinKick Loaded!");
+    }
 
     @Subscribe
     public void onPreLogin(PreLoginEvent event) {
@@ -31,7 +44,7 @@ public class JoinKick {
                 }
 
                 // Disconnect old player
-                player.disconnect(TextComponent.builder().content("You have logged in from another location").color(TextColor.RED).build());
+                player.disconnect(Component.text("You have logged in from another location", NamedTextColor.RED));
                 return;
             }
         }
